@@ -4,7 +4,17 @@ const Route = require('route-parser');
 const routes = [];
 
 const addRoute = (method, route, handler) => {
-  routes.push({ method, route, handler });
+  routes.push({ method, url: new Route(route), handler });
+};
+
+const findRoute = (method, url) => {
+  const route = routes.find(route => {
+    return route.method === method && route.url.match(url);
+  });
+
+  if (!route) return null;
+
+  return { route, params: route.url.match(url) };
 };
 
 const get = (route, handler) => addRoute('get', route, handler);
@@ -14,8 +24,22 @@ const router = () => {
   const listen = async port => {
     return http
       .createServer(async (req, res) => {
-        res.write('Hello World!');
-        res.end();
+        const method = req.method.toLowerCase();
+        const url = req.url.toLowerCase();
+        const found = findRoute(method, url);
+
+        if (found) {
+          res.params = found.params;
+          res.send = content => {
+            res.writeHead(200, { 'Content-Type': 'text/plain' });
+            res.end(content);
+          };
+
+          return found.route.handler(req, res);
+        }
+
+        res.writeHead(404, { 'Content-Type': 'text/plain' });
+        res.end('Route not found.');
       })
       .listen(port);
   };
