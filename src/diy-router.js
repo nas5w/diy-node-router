@@ -2,10 +2,10 @@ const http = require('http');
 const Route = require('route-parser');
 
 const router = (() => {
-  const routes = [];
+  let routes = [];
 
-  const addRoute = (method, route, handler) => {
-    routes.push({ method, url: new Route(route), handler });
+  const addRoute = (method, url, handler) => {
+    routes.push({ method, url: new Route(url), handler });
   };
 
   const findRoute = (method, url) => {
@@ -15,15 +15,15 @@ const router = (() => {
 
     if (!route) return null;
 
-    return { route, params: route.url.match(url) };
+    return { handler: route.handler, params: route.url.match(url) };
   };
 
   const get = (route, handler) => addRoute('get', route, handler);
   const post = (route, handler) => addRoute('post', route, handler);
 
   const router = () => {
-    const listen = async (port, cb) => {
-      await http
+    const listen = (port, cb) => {
+      http
         .createServer((req, res) => {
           const method = req.method.toLowerCase();
           const url = req.url.toLowerCase();
@@ -36,7 +36,7 @@ const router = (() => {
               res.end(content);
             };
 
-            return found.route.handler(req, res);
+            return found.handler(req, res);
           }
 
           res.writeHead(404, { 'Content-Type': 'text/plain' });
