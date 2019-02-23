@@ -22,8 +22,8 @@ const router = (() => {
   const post = (route, handler) => addRoute('post', route, handler);
 
   const router = () => {
-    const listen = (port, cb) => {
-      http
+    const listen = async (port, cb) => {
+      await http
         .createServer((req, res) => {
           const method = req.method.toLowerCase();
           const url = req.url.toLowerCase();
