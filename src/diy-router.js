@@ -22,9 +22,9 @@ const router = (() => {
   const post = (route, handler) => addRoute('post', route, handler);
 
   const router = () => {
-    const listen = async port => {
-      return http
-        .createServer(async (req, res) => {
+    const listen = (port, cb) => {
+      http
+        .createServer((req, res) => {
           const method = req.method.toLowerCase();
           const url = req.url.toLowerCase();
           const found = findRoute(method, url);
@@ -43,6 +43,8 @@ const router = (() => {
           res.end('Route not found.');
         })
         .listen(port);
+
+      return cb();
     };
 
     return {
