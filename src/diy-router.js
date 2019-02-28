@@ -42,9 +42,7 @@ const router = (() => {
           res.writeHead(404, { 'Content-Type': 'text/plain' });
           res.end('Route not found.');
         })
-        .listen(port);
-
-      return cb();
+        .listen(port, cb);
     };
 
     return {
